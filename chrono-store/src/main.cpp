@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "chrono_store.hpp"
-#include "tick_data.hpp"
+
+#include "NaiveChronoStore.hpp"
+#include "TickData.hpp"
 
 // Generate synthetic tick data for benchmarking
 std::vector<TickData> generate_ticks(const std::string &symbol, uint64_t start_ts, int count)
@@ -15,16 +16,15 @@ std::vector<TickData> generate_ticks(const std::string &symbol, uint64_t start_t
         ticks.push_back(TickData{
             symbol,
             static_cast<int64_t>(start_ts + i),
-            100.0 + (i % 50) * 0.1, // price varies slightly
-            100 + (i % 20)          // volume varies
-        });
+            100.0 + (i % 50) * 0.1,
+            100 + (i % 20)});
     }
 
     return ticks;
 }
 
-// Benchmark ingestion performance
-void benchmark_ingest(ChronoStore &store, const std::vector<TickData> &ticks)
+// Method to benchmark tick data ingestion
+void benchmark_ingest(IChronoStore &store, const std::vector<TickData> &ticks)
 {
     auto start = std::chrono::high_resolution_clock::now();
     for (const auto &tick : ticks)
@@ -37,8 +37,8 @@ void benchmark_ingest(ChronoStore &store, const std::vector<TickData> &ticks)
     std::cout << "Ingested " << ticks.size() << " ticks in " << duration << " ms\n";
 }
 
-// Benchmark query performance
-void benchmark_query(const ChronoStore &store, uint64_t start_ts, uint64_t end_ts, const std::string &symbol)
+// Method to benchmark tick data queries
+void benchmark_query(const IChronoStore &store, uint64_t start_ts, uint64_t end_ts, const std::string &symbol)
 {
     auto start = std::chrono::high_resolution_clock::now();
     auto result = store.query(start_ts, end_ts, symbol);
@@ -51,15 +51,16 @@ void benchmark_query(const ChronoStore &store, uint64_t start_ts, uint64_t end_t
 
 int main()
 {
-    ChronoStore store;
+    std::cout << "Benchmarking NaiveChronoStore...\n";
+    NaiveChronoStore store;
 
     std::string symbol = "AAPL";
-    uint64_t start_ts = 1609459200; // 2021-01
-    int tick_count = 1'000'000;     // Number of ticks to generate
+    uint64_t start_ts = 1609459200;
+    int tick_count = 10'000'000;
 
-    auto ticks = generate_ticks("AAPL", start_ts, tick_count);
+    auto ticks = generate_ticks(symbol, start_ts, tick_count);
+
     benchmark_ingest(store, ticks);
-
     benchmark_query(store, start_ts + 1000, start_ts + 5000, "AAPL");
     benchmark_query(store, start_ts + 10'000, start_ts + 20'000, "AAPL");
     benchmark_query(store, start_ts + 0, start_ts + tick_count - 1, "AAPL");

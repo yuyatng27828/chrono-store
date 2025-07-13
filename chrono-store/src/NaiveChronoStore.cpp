@@ -1,11 +1,11 @@
-#include "chrono_store.hpp"
+#include "NaiveChronoStore.hpp"
 
-void ChronoStore::ingest(const TickData &tick)
+void NaiveChronoStore::ingest(const TickData &tick)
 {
     data_store_.push_back(tick);
 }
 
-std::vector<TickData> ChronoStore::query(uint64_t start_time, uint64_t end_time, const std::string &symbol) const
+std::vector<TickData> NaiveChronoStore::query(uint64_t start_time, uint64_t end_time, const std::string &symbol) const
 {
     std::vector<TickData> result;
     for (const auto &tick : data_store_)
