@@ -1,8 +1,12 @@
 #include "NaiveChronoStore.hpp"
 
-void NaiveChronoStore::ingest(const TickData &tick)
+void NaiveChronoStore::ingest(const std::vector<TickData> &ticks)
 {
-    data_store_.push_back(tick);
+    data_store_.reserve(data_store_.size() + ticks.size());
+    for (const auto &tick : ticks)
+    {
+        data_store_.push_back(tick);
+    }
 }
 
 std::vector<TickData> NaiveChronoStore::query(uint64_t start_time, uint64_t end_time, const std::string &symbol) const

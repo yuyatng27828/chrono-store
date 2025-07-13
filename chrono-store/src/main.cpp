@@ -27,10 +27,7 @@ std::vector<TickData> generate_ticks(const std::string &symbol, uint64_t start_t
 void benchmark_ingest(IChronoStore &store, const std::vector<TickData> &ticks)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    for (const auto &tick : ticks)
-    {
-        store.ingest(tick);
-    }
+    store.ingest(ticks);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
@@ -52,18 +49,20 @@ void benchmark_query(const IChronoStore &store, uint64_t start_ts, uint64_t end_
 int main()
 {
     std::cout << "Benchmarking NaiveChronoStore...\n";
-    NaiveChronoStore store;
+    IChronoStore *store = new NaiveChronoStore();
 
     std::string symbol = "AAPL";
     uint64_t start_ts = 1609459200;
-    int tick_count = 10'000'000;
+    int tick_count = 100'000'000;
 
     auto ticks = generate_ticks(symbol, start_ts, tick_count);
 
-    benchmark_ingest(store, ticks);
-    benchmark_query(store, start_ts + 1000, start_ts + 5000, "AAPL");
-    benchmark_query(store, start_ts + 10'000, start_ts + 20'000, "AAPL");
-    benchmark_query(store, start_ts + 0, start_ts + tick_count - 1, "AAPL");
+    benchmark_ingest(*store, ticks);
+    benchmark_query(*store, start_ts + 1000, start_ts + 5000, "AAPL");
+    benchmark_query(*store, start_ts + 10'000, start_ts + 20'000, "AAPL");
+    benchmark_query(*store, start_ts + 0, start_ts + tick_count - 1, "AAPL");
+
+    delete store;
 
     return 0;
 }
