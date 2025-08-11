@@ -1,23 +1,29 @@
 #include <iostream>
+#include <random>
 #include <vector>
 #include <string>
 
 #include "ChronoStore.hpp"
 #include "TickData.hpp"
 
-// Generate synthetic tick data for benchmarking
-std::vector<TickData> generate_ticks(const std::string &symbol, uint64_t start_ts, int count)
+std::vector<TickData> generate_random_ticks(const std::vector<std::string> &symbols, uint64_t start_ts, uint64_t end_ts, int count)
 {
     std::vector<TickData> ticks;
     ticks.reserve(count);
 
+    std::mt19937 rng(static_cast<unsigned>(std::chrono::steady_clock::now().time_since_epoch().count()));
+    std::uniform_int_distribution<size_t> symbol_dist(0, symbols.size() - 1);
+    std::uniform_int_distribution<uint64_t> ts_dist(start_ts, end_ts);
+    std::uniform_real_distribution<double> price_dist(100.0, 105.0);
+    std::uniform_int_distribution<int> volume_dist(100, 120);
+
     for (int i = 0; i < count; ++i)
     {
         ticks.push_back(TickData{
-            symbol,
-            static_cast<int64_t>(start_ts + i),
-            100.0 + (i % 50) * 0.1,
-            100 + (i % 20)});
+            symbols[symbol_dist(rng)],
+            static_cast<int64_t>(ts_dist(rng)),
+            price_dist(rng),
+            volume_dist(rng)});
     }
 
     return ticks;
@@ -51,16 +57,19 @@ int main()
     std::cout << "Benchmarking ChronoStore...\n";
     IChronoStore *store = new ChronoStore();
 
-    std::string symbol = "AAPL";
-    uint64_t start_ts = 1609459200;
-    int tick_count = 100'000'000;
+    std::vector<std::string> symbols = {"AAPL", "GOOG", "MSFT", "TSLA"};
+    uint64_t start_time = 1609459200; // 2021-01-01 00:00:00 UTC
+    uint64_t end_time = 1609545600;   // 2021-01-02 00:00:00 UTC
+    int tick_count = 10'000'000;
 
-    auto ticks = generate_ticks(symbol, start_ts, tick_count);
+    auto ticks = generate_random_ticks(symbols, start_time, end_time, tick_count);
 
     benchmark_ingest(*store, ticks);
-    benchmark_query(*store, start_ts + 1000, start_ts + 5000, "AAPL");
-    benchmark_query(*store, start_ts + 10'000, start_ts + 20'000, "AAPL");
-    benchmark_query(*store, start_ts + 0, start_ts + tick_count - 1, "AAPL");
+
+    for (const auto &sym : symbols)
+    {
+        benchmark_query(*store, start_time, end_time, sym);
+    }
 
     delete store;
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <map>
 #include "IChronoStore.hpp"
 #include "TickData.hpp"
 
@@ -11,4 +12,5 @@ public:
 
 private:
     std::vector<TickData> data_store_;
+    std::map<std::string, std::vector<TickData>> ticks_by_symbol_;
 };
