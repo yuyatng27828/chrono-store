@@ -3,7 +3,7 @@
 #include "IChronoStore.hpp"
 #include "TickData.hpp"
 
-class NaiveChronoStore : public IChronoStore
+class ChronoStore : public IChronoStore
 {
 public:
     void ingest(const std::vector<TickData> &ticks) override;

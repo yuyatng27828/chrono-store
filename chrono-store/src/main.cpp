@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-#include "NaiveChronoStore.hpp"
+#include "ChronoStore.hpp"
 #include "TickData.hpp"
 
 // Generate synthetic tick data for benchmarking
@@ -48,8 +48,8 @@ void benchmark_query(const IChronoStore &store, uint64_t start_ts, uint64_t end_
 
 int main()
 {
-    std::cout << "Benchmarking NaiveChronoStore...\n";
-    IChronoStore *store = new NaiveChronoStore();
+    std::cout << "Benchmarking ChronoStore...\n";
+    IChronoStore *store = new ChronoStore();
 
     std::string symbol = "AAPL";
     uint64_t start_ts = 1609459200;
