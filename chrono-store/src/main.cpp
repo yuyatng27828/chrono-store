@@ -15,8 +15,8 @@ std::vector<TickData> generate_random_ticks(const std::vector<std::string> &symb
     std::mt19937 rng(static_cast<unsigned>(std::chrono::steady_clock::now().time_since_epoch().count()));
     std::uniform_int_distribution<size_t> symbol_dist(0, symbols.size() - 1);
     std::uniform_int_distribution<uint64_t> ts_dist(start_ts, end_ts);
-    std::uniform_real_distribution<double> price_dist(100.0, 105.0);
-    std::uniform_int_distribution<int> volume_dist(100, 120);
+    std::uniform_int_distribution<int64_t> price_dist(100, 105);
+    std::uniform_int_distribution<int64_t> volume_dist(100, 120);
 
     for (int i = 0; i < count; ++i)
     {
@@ -25,11 +25,6 @@ std::vector<TickData> generate_random_ticks(const std::vector<std::string> &symb
             static_cast<int64_t>(ts_dist(rng)),
             price_dist(rng),
             volume_dist(rng)});
-
-        // std::cout << "Generated tick: "
-        //           << ticks.back().symbol << " at " << ticks.back().timestamp
-        //           << " with price " << ticks.back().price
-        //           << " and volume " << ticks.back().volume << "\n";
     }
 
     return ticks;

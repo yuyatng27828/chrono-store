@@ -13,8 +13,12 @@ public:
     void push(const T &item);
     void push(const std::vector<T> &items);
 
-    std::vector<T> get_last_n(size_t n) const;
-    std::vector<T> get_last_t(std::chrono::milliseconds duration) const;
+    using RingBufferIterPair = std::pair<typename std::vector<T>::const_iterator,
+                                         typename std::vector<T>::const_iterator>;
+    using RingBufferIterRange = std::pair<RingBufferIterPair, RingBufferIterPair>;
+
+    RingBufferIterRange get_last_n(size_t n) const;
+    RingBufferIterRange get_last_t(std::chrono::milliseconds duration) const;
 
     size_t size() const;
     bool full() const;

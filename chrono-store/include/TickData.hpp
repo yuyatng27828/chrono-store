@@ -5,6 +5,6 @@ struct TickData
 {
     std::string symbol;
     int64_t timestamp;
-    double price;
-    int volume;
+    int64_t price;
+    int64_t volume;
 };
