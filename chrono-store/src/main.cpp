@@ -24,6 +24,11 @@ std::vector<TickData> generate_random_ticks(const std::vector<std::string> &symb
             static_cast<int64_t>(ts_dist(rng)),
             price_dist(rng),
             volume_dist(rng)});
+
+        std::cout << "Generated tick: "
+                  << ticks.back().symbol << " at " << ticks.back().timestamp
+                  << " with price " << ticks.back().price
+                  << " and volume " << ticks.back().volume << "\n";
     }
 
     return ticks;
@@ -60,7 +65,7 @@ int main()
     std::vector<std::string> symbols = {"AAPL", "GOOG", "MSFT", "TSLA"};
     uint64_t start_time = 1609459200; // 2021-01-01 00:00:00 UTC
     uint64_t end_time = 1609545600;   // 2021-01-02 00:00:00 UTC
-    int tick_count = 10'000'000;
+    int tick_count = 1'000'000;
 
     auto ticks = generate_random_ticks(symbols, start_time, end_time, tick_count);
 
