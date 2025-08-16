@@ -1,29 +1,49 @@
 #include "ChronoStore.hpp"
 
-bool timestamp_cmp(const TickData &a, const TickData &b)
+#include <vector>        // std::vector
+#include <string>        // std::string
+#include <unordered_map> // std::unordered_map
+#include <algorithm>     // std::sort, std::merge, std::lower_bound, std::upper_bound
+
+// ---------------- ChronoStore internal methods ---------------- //
+namespace
 {
-    return a.timestamp < b.timestamp;
+    inline bool compare_tick_timestamp(const TickData &a, const TickData &b)
+    {
+        return a.timestamp < b.timestamp;
+    }
+
+    inline void merge_ticks(std::vector<TickData> &existing_ticks, std::vector<TickData> &new_ticks)
+    {
+        // Sort new ticks
+        std::sort(new_ticks.begin(), new_ticks.end(), compare_tick_timestamp);
+
+        // Create new vector for merged ticks
+        std::vector<TickData> merged_ticks;
+        merged_ticks.reserve(existing_ticks.size() + new_ticks.size());
+
+        // Merge existing and new ticks
+        std::merge(existing_ticks.begin(), existing_ticks.end(),
+                   new_ticks.begin(), new_ticks.end(),
+                   std::back_inserter(merged_ticks),
+                   compare_tick_timestamp);
+
+        // Update existing ticks with merged ticks
+        existing_ticks = std::move(merged_ticks);
+    }
+
+    inline bool tick_before_time(const TickData &tick, uint64_t ts)
+    {
+        return tick.timestamp < ts;
+    }
+
+    inline bool time_before_tick(uint64_t ts, const TickData &tick)
+    {
+        return ts < tick.timestamp;
+    }
 }
 
-void merge_ticks(std::vector<TickData> &existing_ticks, std::vector<TickData> &new_ticks)
-{
-    // Sort new ticks
-    std::sort(new_ticks.begin(), new_ticks.end(), timestamp_cmp);
-
-    // Create new vector for merged ticks
-    std::vector<TickData> merged_ticks;
-    merged_ticks.reserve(existing_ticks.size() + new_ticks.size());
-
-    // Merge existing and new ticks
-    std::merge(existing_ticks.begin(), existing_ticks.end(),
-               new_ticks.begin(), new_ticks.end(),
-               std::back_inserter(merged_ticks),
-               timestamp_cmp);
-
-    // Update existing ticks with merged ticks
-    existing_ticks = std::move(merged_ticks);
-}
-
+// ---------------- ChronoStore public methods ---------------- //
 void ChronoStore::ingest(const std::vector<TickData> &ticks)
 {
     // Group ticks by symbol
@@ -33,6 +53,7 @@ void ChronoStore::ingest(const std::vector<TickData> &ticks)
         batches[tick.symbol].push_back(tick);
     }
 
+    // For each symbol, merge exisiting and new ticks
     for (auto &[symbol, batch] : batches)
     {
         auto &symbol_ticks = ticks_by_symbol_[symbol];
@@ -52,20 +73,9 @@ std::vector<TickData> ChronoStore::query(uint64_t start_time, uint64_t end_time,
     // Get the ticks for that symbol
     const auto &ticks = it->second;
 
-    // Define helper lambdas for timestamp comparison
-    auto lower_cmp = [](const TickData &tick, uint64_t ts)
-    {
-        return tick.timestamp < ts;
-    };
-
-    auto upper_cmp = [](uint64_t ts, const TickData &tick)
-    {
-        return ts < tick.timestamp;
-    };
-
     // Find the range of ticks within the specified time range
-    auto start_it = std::lower_bound(ticks.begin(), ticks.end(), start_time, lower_cmp);
-    auto end_it = std::upper_bound(ticks.begin(), ticks.end(), end_time, upper_cmp);
+    auto start_it = std::lower_bound(ticks.begin(), ticks.end(), start_time, tick_before_time);
+    auto end_it = std::upper_bound(ticks.begin(), ticks.end(), end_time, time_before_tick);
 
     return {start_it, end_it};
 }
