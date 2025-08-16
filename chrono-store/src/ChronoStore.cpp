@@ -1,9 +1,10 @@
 #include "ChronoStore.hpp"
+#include "TickData.hpp"
 
-#include <vector>        // std::vector
+#include <algorithm>     // std::sort, std::merge, std::lower_bound, std::upper_bound
 #include <string>        // std::string
 #include <unordered_map> // std::unordered_map
-#include <algorithm>     // std::sort, std::merge, std::lower_bound, std::upper_bound
+#include <vector>        // std::vector
 
 // ---------------- ChronoStore internal methods ---------------- //
 namespace
@@ -53,7 +54,7 @@ void ChronoStore::ingest(const std::vector<TickData> &ticks)
         batches[tick.symbol].push_back(tick);
     }
 
-    // For each symbol, merge exisiting and new ticks
+    // For each symbol, merge existing and new ticks
     for (auto &[symbol, batch] : batches)
     {
         auto &symbol_ticks = ticks_by_symbol_[symbol];
@@ -61,13 +62,14 @@ void ChronoStore::ingest(const std::vector<TickData> &ticks)
     }
 }
 
-std::vector<TickData> ChronoStore::query(uint64_t start_time, uint64_t end_time, const std::string &symbol) const
+std::pair<ChronoStore::TickIterator, ChronoStore::TickIterator>
+ChronoStore::query(uint64_t start_time, uint64_t end_time, const std::string &symbol) const
 {
     // Check if the symbol exists in the store
     auto it = ticks_by_symbol_.find(symbol);
     if (it == ticks_by_symbol_.end())
     {
-        return {};
+        return {{}, {}};
     }
 
     // Get the ticks for that symbol

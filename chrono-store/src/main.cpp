@@ -1,10 +1,11 @@
-#include <iostream>
-#include <random>
-#include <vector>
-#include <string>
-
 #include "ChronoStore.hpp"
 #include "TickData.hpp"
+
+#include <chrono>
+#include <iostream>
+#include <random>
+#include <string>
+#include <vector>
 
 std::vector<TickData> generate_random_ticks(const std::vector<std::string> &symbols, uint64_t start_ts, uint64_t end_ts, int count)
 {
@@ -35,7 +36,7 @@ std::vector<TickData> generate_random_ticks(const std::vector<std::string> &symb
 }
 
 // Method to benchmark tick data ingestion
-void benchmark_ingest(IChronoStore &store, const std::vector<TickData> &ticks)
+void benchmark_ingest(ChronoStore &store, const std::vector<TickData> &ticks)
 {
     auto start = std::chrono::high_resolution_clock::now();
     store.ingest(ticks);
@@ -46,21 +47,22 @@ void benchmark_ingest(IChronoStore &store, const std::vector<TickData> &ticks)
 }
 
 // Method to benchmark tick data queries
-void benchmark_query(const IChronoStore &store, uint64_t start_ts, uint64_t end_ts, const std::string &symbol)
+void benchmark_query(const ChronoStore &store, uint64_t start_ts, uint64_t end_ts, const std::string &symbol)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    auto result = store.query(start_ts, end_ts, symbol);
+    auto [begin_it, end_it] = store.query(start_ts, end_ts, symbol);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    size_t count = std::distance(begin_it, end_it);
 
     std::cout << "Queried [" << symbol << "] from " << start_ts << " to " << end_ts
-              << " -> " << result.size() << " results in " << duration << " µs\n";
+              << " -> " << count << " results in " << duration << " µs\n";
 }
 
 int main()
 {
     std::cout << "Benchmarking ChronoStore...\n";
-    IChronoStore *store = new ChronoStore();
+    ChronoStore *store = new ChronoStore();
 
     std::vector<std::string> symbols = {"AAPL", "GOOG", "MSFT", "TSLA"};
     uint64_t start_time = 1609459200; // 2021-01-01 00:00:00 UTC
