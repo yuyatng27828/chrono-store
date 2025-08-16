@@ -26,10 +26,10 @@ std::vector<TickData> generate_random_ticks(const std::vector<std::string> &symb
             price_dist(rng),
             volume_dist(rng)});
 
-        std::cout << "Generated tick: "
-                  << ticks.back().symbol << " at " << ticks.back().timestamp
-                  << " with price " << ticks.back().price
-                  << " and volume " << ticks.back().volume << "\n";
+        // std::cout << "Generated tick: "
+        //           << ticks.back().symbol << " at " << ticks.back().timestamp
+        //           << " with price " << ticks.back().price
+        //           << " and volume " << ticks.back().volume << "\n";
     }
 
     return ticks;

@@ -3,6 +3,7 @@
 
 #include <algorithm>     // std::sort, std::merge, std::lower_bound, std::upper_bound
 #include <string>        // std::string
+#include <thread>        // std::thread
 #include <unordered_map> // std::unordered_map
 #include <vector>        // std::vector
 
@@ -54,11 +55,22 @@ void ChronoStore::ingest(const std::vector<TickData> &ticks)
         batches[tick.symbol].push_back(tick);
     }
 
-    // For each symbol, merge existing and new ticks
+    // Launch threads to merge ticks for each symbol
+    std::vector<std::thread> threads;
+    threads.reserve(batches.size());
+
     for (auto &[symbol, batch] : batches)
     {
-        auto &symbol_ticks = ticks_by_symbol_[symbol];
-        merge_ticks(symbol_ticks, batch);
+        threads.emplace_back([this, &symbol, &batch]()
+                             {
+            std::lock_guard<std::mutex> lock(symbol_mutexes_[symbol]);
+            merge_ticks(ticks_by_symbol_[symbol], batch); });
+    }
+
+    // Wait for all threads to finish
+    for (auto &t : threads)
+    {
+        t.join();
     }
 }
 
