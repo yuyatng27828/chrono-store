@@ -30,7 +30,6 @@ std::vector<TickData> generate_random_ticks(ChronoStore &store, const std::vecto
     return ticks;
 }
 
-// Method to benchmark tick data ingestion
 void benchmark_ingest(ChronoStore &store, const std::vector<TickData> &ticks)
 {
     auto start = std::chrono::high_resolution_clock::now();
@@ -41,19 +40,6 @@ void benchmark_ingest(ChronoStore &store, const std::vector<TickData> &ticks)
     std::cout << "Ingested " << ticks.size() << " ticks in " << duration << " ms\n";
 }
 
-// // Method to benchmark tick data queries
-// void benchmark_query(const ChronoStore &store, uint64_t start_ts, uint64_t end_ts, const std::string &symbol)
-// {
-//     auto start = std::chrono::high_resolution_clock::now();
-//     auto [begin_it, end_it] = store.query(start_ts, end_ts, symbol);
-//     auto end = std::chrono::high_resolution_clock::now();
-//     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-//     size_t count = std::distance(begin_it, end_it);
-
-//     std::cout << "Queried [" << symbol << "] from " << start_ts << " to " << end_ts
-//               << " -> " << count << " results in " << duration << " µs\n";
-// }
-
 int main()
 {
     std::cout << "Benchmarking ChronoStore...\n";
@@ -62,16 +48,11 @@ int main()
     std::vector<std::string> symbols = {"AAPL", "GOOG", "MSFT", "TSLA"};
     uint64_t start_time = 1609459200; // 2021-01-01 00:00:00 UTC
     uint64_t end_time = 1609545600;   // 2021-01-02 00:00:00 UTC
-    int tick_count = 10'000'000;
+    int tick_count = 1'000'000;
 
     auto ticks = generate_random_ticks(*store, symbols, start_time, end_time, tick_count);
 
     benchmark_ingest(*store, ticks);
-
-    // for (const auto &sym : symbols)
-    // {
-    //     benchmark_query(*store, start_time, end_time, sym);
-    // }
 
     delete store;
 
