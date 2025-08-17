@@ -8,4 +8,4 @@
 | TSLA   | 1609459200 | 1609545600 | 249,561 | 8 µs       |
 
 **Total ticks ingested:** 1,000,000  
-**Ingestion time:** 500 ms
+**Ingestion time:** sub-500 ms
