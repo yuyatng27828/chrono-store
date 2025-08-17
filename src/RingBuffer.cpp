@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <chrono>  // std::chrono::milliseconds
 #include <cstddef> // std::size_t
+#include <span>    // std::span
 #include <vector>  // std::vector
 #include <utility> // std::pair
 
@@ -31,7 +32,7 @@ void RingBuffer<T>::push(const std::vector<T> &items)
 }
 
 template <typename T>
-typename RingBuffer<T>::RingBufferIterRange RingBuffer<T>::get_last_n(size_t n) const
+typename RingBuffer<T>::RingBufferSpanRange RingBuffer<T>::get_last_n(size_t n) const
 {
 
     n = std::min(n, size_);
@@ -41,14 +42,20 @@ typename RingBuffer<T>::RingBufferIterRange RingBuffer<T>::get_last_n(size_t n) 
     size_t start_idx = (head_ + capacity_ - n) % capacity_;
 
     if (start_idx < head_)
-        return {{buffer_.begin() + start_idx, buffer_.begin() + head_}, {}};
+    {
+        return {std::span<const T>(&buffer_[start_idx], n), {}};
+    }
     else
-        return {{buffer_.begin() + start_idx, buffer_.end()},
-                {buffer_.begin(), buffer_.begin() + head_}};
+    {
+        size_t first_len = capacity_ - start_idx;
+        size_t second_len = n - first_len;
+        return {std::span<const T>(&buffer_[start_idx], first_len),
+                std::span<const T>(&buffer_[0], second_len)};
+    }
 }
 
 template <typename T>
-typename RingBuffer<T>::RingBufferIterRange RingBuffer<T>::get_last_t(std::chrono::milliseconds duration) const
+typename RingBuffer<T>::RingBufferSpanRange RingBuffer<T>::get_last_t(std::chrono::milliseconds duration) const
 {
     if (size_ == 0)
         return {{}, {}};

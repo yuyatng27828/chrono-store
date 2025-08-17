@@ -2,6 +2,8 @@
 
 #include <chrono>  // std::chrono::milliseconds
 #include <cstddef> // std::size_t
+#include <span>    // std::span
+#include <utility> // std::pair
 #include <vector>  // std::vector
 
 template <typename T>
@@ -13,12 +15,11 @@ public:
     void push(const T &item);
     void push(const std::vector<T> &items);
 
-    using RingBufferIterPair = std::pair<typename std::vector<T>::const_iterator,
-                                         typename std::vector<T>::const_iterator>;
-    using RingBufferIterRange = std::pair<RingBufferIterPair, RingBufferIterPair>;
+    using RingBufferSpan = std::span<const T>;
+    using RingBufferSpanRange = std::pair<RingBufferSpan, RingBufferSpan>;
 
-    RingBufferIterRange get_last_n(size_t n) const;
-    RingBufferIterRange get_last_t(std::chrono::milliseconds duration) const;
+    RingBufferSpanRange get_last_n(size_t n) const;
+    RingBufferSpanRange get_last_t(std::chrono::milliseconds duration) const;
 
     size_t size() const;
     bool full() const;
