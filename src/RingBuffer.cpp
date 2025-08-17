@@ -13,22 +13,28 @@ RingBuffer<T>::RingBuffer(size_t capacity)
     : buffer_(capacity), capacity_(capacity), head_(0), tail_(0), size_(0) {}
 
 template <typename T>
-void RingBuffer<T>::push(const T &item)
-{
-    buffer_[head_] = item;
-    head_ = (head_ + 1) % capacity_;
-
-    if (size_ < capacity_)
-        ++size_;
-    else
-        tail_ = (tail_ + 1) % capacity_; // Overwrite the oldest item if full
-}
-
-template <typename T>
 void RingBuffer<T>::push(const std::vector<T> &items)
 {
-    for (const auto &item : items)
-        push(item);
+    size_t n = items.size();
+    if (n == 0)
+        return;
+
+    size_t first_copy = std::min(n, capacity_ - head_);
+    std::copy(items.begin(), items.begin() + first_copy, buffer_.begin() + head_);
+
+    if (n > first_copy)
+        std::copy(items.begin() + first_copy, items.end(), buffer_.begin());
+
+    head_ = (head_ + n) & (capacity_ - 1);
+    if (size_ + n <= capacity_)
+    {
+        size_ += n;
+    }
+    else
+    {
+        size_ = capacity_;
+        tail_ = (head_ + capacity_ - size_) & (capacity_ - 1);
+    }
 }
 
 template <typename T>

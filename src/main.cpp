@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-std::vector<TickData> generate_random_ticks(const std::vector<std::string> &symbols, uint64_t start_ts, uint64_t end_ts, int count)
+std::vector<TickData> generate_random_ticks(ChronoStore &store, const std::vector<std::string> &symbols, uint64_t start_ts, uint64_t end_ts, int count)
 {
     std::vector<TickData> ticks;
     ticks.reserve(count);
@@ -22,7 +22,7 @@ std::vector<TickData> generate_random_ticks(const std::vector<std::string> &symb
     {
         ticks.push_back(TickData{
             symbols[symbol_dist(rng)],
-            static_cast<int64_t>(ts_dist(rng)),
+            ts_dist(rng),
             price_dist(rng),
             volume_dist(rng)});
     }
@@ -62,9 +62,9 @@ int main()
     std::vector<std::string> symbols = {"AAPL", "GOOG", "MSFT", "TSLA"};
     uint64_t start_time = 1609459200; // 2021-01-01 00:00:00 UTC
     uint64_t end_time = 1609545600;   // 2021-01-02 00:00:00 UTC
-    int tick_count = 1'000;
+    int tick_count = 10'000'000;
 
-    auto ticks = generate_random_ticks(symbols, start_time, end_time, tick_count);
+    auto ticks = generate_random_ticks(*store, symbols, start_time, end_time, tick_count);
 
     benchmark_ingest(*store, ticks);
 
