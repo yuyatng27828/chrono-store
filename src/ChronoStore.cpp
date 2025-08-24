@@ -26,3 +26,11 @@ void ChronoStore::ingest(const std::vector<TickData> &ticks)
         it->second.push(ticks);
     }
 };
+
+ChronoStore::RingBufferSpanRange ChronoStore::query_last_n(const std::string &symbol, size_t n) const
+{
+    auto it = ticks_by_symbol_.find(symbol);
+    if (it == ticks_by_symbol_.end())
+        return {{}, {}};
+    return it->second.get_last_n(n);
+}

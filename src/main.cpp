@@ -40,6 +40,17 @@ void benchmark_ingest(ChronoStore &store, const std::vector<TickData> &ticks)
     std::cout << "Ingested " << ticks.size() << " ticks in " << duration << " ms\n";
 }
 
+void benchmark_query_last_n(ChronoStore &store, const std::string &symbol, size_t n)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+    auto result = store.query_last_n(symbol, n);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+    size_t total_ticks = result.first.size() + result.second.size();
+    std::cout << "Queried last " << total_ticks << " ticks for symbol " << symbol << " in " << duration << " µs, retrieved " << total_ticks << " ticks\n";
+}
+
 int main()
 {
     std::cout << "Benchmarking ChronoStore...\n";
@@ -53,6 +64,8 @@ int main()
     auto ticks = generate_random_ticks(*store, symbols, start_time, end_time, tick_count);
 
     benchmark_ingest(*store, ticks);
+
+    benchmark_query_last_n(*store, "AAPL", 100'000);
 
     delete store;
 
