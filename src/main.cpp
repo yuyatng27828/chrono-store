@@ -14,8 +14,12 @@ const std::string RESET = "\033[0m";
 const std::string RED = "\033[31m";
 const std::string GREEN = "\033[32m";
 const std::string WHITE = "\033[37m";
+const std::string LIGHT_BLUE = "\033[36m";
+const std::string MAGENTA = "\033[35m";
+const std::string YELLOW = "\033[33m";
 
-std::string format_timestamp_est(uint64_t ms_timestamp)
+std::string
+format_timestamp_est(uint64_t ms_timestamp)
 {
     std::time_t t = ms_timestamp / 1000;
 
@@ -56,14 +60,14 @@ void print_candles_with_colored_arrows(const std::vector<CandleData> &candles)
             color = WHITE;
         }
 
-        std::cout << c.symbol
-                  << " @ " << format_timestamp_est(c.timestamp)
-                  << " " << color << arrow << RESET // move arrow here
-                  << " | O: " << c.open
-                  << ", H: " << c.high
-                  << ", L: " << c.low
-                  << ", C: " << c.close
-                  << ", V: " << c.volume
+        std::cout << LIGHT_BLUE << std::setw(5) << c.symbol << RESET
+                  << " @ " << MAGENTA << format_timestamp_est(c.timestamp) << RESET
+                  << " " << color << arrow << RESET
+                  << " | O: " << std::fixed << std::setprecision(2) << std::setw(7) << c.open
+                  << ", H: " << std::setw(7) << c.high
+                  << ", L: " << std::setw(7) << c.low
+                  << ", C: " << std::setw(7) << c.close
+                  << " | " << YELLOW << "V: " << std::setw(6) << c.volume << RESET
                   << std::endl;
     }
 }
