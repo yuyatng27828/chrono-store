@@ -51,6 +51,17 @@ void benchmark_query_last_n(ChronoStore &store, const std::string &symbol, size_
     std::cout << "Queried last " << total_ticks << " ticks for symbol " << symbol << " in " << duration << " µs, retrieved " << total_ticks << " ticks\n";
 }
 
+void benchmark_query_last_t(ChronoStore &store, const std::string &symbol, std::chrono::milliseconds duration)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+    auto result = store.query_last_t(symbol, duration);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto query_duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+    size_t total_ticks = result.first.size() + result.second.size();
+    std::cout << "Queried last " << duration.count() << " ms for symbol " << symbol << " in " << query_duration << " µs, retrieved " << total_ticks << " ticks\n";
+}
+
 int main()
 {
     std::cout << "Benchmarking ChronoStore...\n";
@@ -60,12 +71,11 @@ int main()
     uint64_t start_time = 1609459200; // 2021-01-01 00:00:00 UTC
     uint64_t end_time = 1609545600;   // 2021-01-02 00:00:00 UTC
     int tick_count = 1'000'000;
-
     auto ticks = generate_random_ticks(*store, symbols, start_time, end_time, tick_count);
 
     benchmark_ingest(*store, ticks);
-
     benchmark_query_last_n(*store, "AAPL", 100'000);
+    benchmark_query_last_t(*store, "GOOG", std::chrono::milliseconds(300000));
 
     delete store;
 

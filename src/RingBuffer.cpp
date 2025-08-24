@@ -66,15 +66,15 @@ typename RingBuffer<T>::RingBufferSpanRange RingBuffer<T>::get_last_t(std::chron
     if (size_ == 0)
         return {{}, {}};
 
-    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-                   std::chrono::steady_clock::now().time_since_epoch())
-                   .count();
-    size_t n = 0;
+    size_t latest_idx = (head_ + capacity_ - 1) & (capacity_ - 1);
+    auto latest_ts = buffer_[latest_idx].timestamp;
+    auto cutoff = latest_ts - duration.count();
 
+    size_t n = 0;
     while (n < size_)
     {
-        size_t idx = (head_ + capacity_ - 1 - n) % capacity_;
-        if (now - buffer_[idx].timestamp > duration.count())
+        size_t idx = (latest_idx + capacity_ - n) & (capacity_ - 1);
+        if (buffer_[idx].timestamp < cutoff)
             break;
         ++n;
     }
