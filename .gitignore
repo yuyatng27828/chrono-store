@@ -6,3 +6,6 @@ venv/
 
 # Build files
 build/
+
+# Polygon data
+data/
