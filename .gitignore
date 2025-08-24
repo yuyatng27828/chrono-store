@@ -1,0 +1,8 @@
+# MacOS files
+.DS_Store
+
+# Python virtual environment
+venv/
+
+# Build files
+build/
