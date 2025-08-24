@@ -31,8 +31,6 @@ std::vector<CandleData> load_candles_from_csv(const std::string &filepath, const
         return candles;
     }
 
-    std::cout << "CSV header: " << line << std::endl;
-
     size_t line_number = 1;
     while (std::getline(file, line))
     {
@@ -54,19 +52,19 @@ std::vector<CandleData> load_candles_from_csv(const std::string &filepath, const
 
             // Open
             std::getline(ss, field, ',');
-            c.open = std::stoll(trim(field));
+            c.open = std::stod(trim(field));
 
             // High
             std::getline(ss, field, ',');
-            c.high = std::stoll(trim(field));
+            c.high = std::stod(trim(field));
 
             // Low
             std::getline(ss, field, ',');
-            c.low = std::stoll(trim(field));
+            c.low = std::stod(trim(field));
 
             // Close
             std::getline(ss, field, ',');
-            c.close = std::stoll(trim(field));
+            c.close = std::stod(trim(field));
 
             // Volume
             std::getline(ss, field, ',');

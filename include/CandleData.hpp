@@ -5,9 +5,9 @@ struct CandleData
 {
     std::string symbol;
     uint64_t timestamp;
-    int64_t open;
-    int64_t high;
-    int64_t low;
-    int64_t close;
+    double open;
+    double high;
+    double low;
+    double close;
     int64_t volume;
 };
