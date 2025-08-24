@@ -1,5 +1,5 @@
+#include "CandleData.hpp"
 #include "RingBuffer.hpp"
-#include "TickData.hpp"
 
 #include <algorithm>
 #include <chrono>  // std::chrono::milliseconds
@@ -95,4 +95,4 @@ bool RingBuffer<T>::full() const
 }
 
 // ---------------- Explicit template instantiation ---------------- //
-template class RingBuffer<TickData>;
+template class RingBuffer<CandleData>;
